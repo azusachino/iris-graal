@@ -1,12 +1,21 @@
 version: "3"
 
-vars:
-  PROJ_NAME: iris-graal
-  PROJ_VER: 1.0.0
+dotenv:
+  - ".env"
 
 tasks:
+  buildJar:
+    cmds:
+      - mvn clean package -DskipTests -Drevision="$VERSION-SNAPSHOT"
+  native:
+    cmds:
+      - mvn -Pnative native:compile -DskipTests
   buildImage:
     cmds:
-      - mvn -Pnative native:compile
-      - docker build -t {.PROJ_NAME}:{.PROJ_VER} .
-      # - docker push {.PROJ_NAME}:{.PROJ_VER}
+      - task: native
+      - docker build -t "$APP:$VERSION" .
+      # - docker push "$APP:$VERSION"
+  jib:
+    cmds:
+      - echo "$AUTHOR/$APP:$VERSION"
+      # - mvn compile jib:build -Dimage="$AUTHOR/$APP:$VERSION"
